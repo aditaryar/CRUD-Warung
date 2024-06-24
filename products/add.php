@@ -1,24 +1,6 @@
 <?php
-include '../config.php';  // Pastikan path relatif untuk config.php benar
-
-$db = new Database();
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nama_produk = $_POST['nama_produk'];
-    $harga = $_POST['harga'];
-    $stok = $_POST['stok'];
-
-    $sql = "INSERT INTO produk (nama_produk, harga, stok) VALUES ('$nama_produk', '$harga', '$stok')";
-
-    if ($db->sqlquery($sql) === TRUE) {
-        header("Location: view.php");  // Panggil index.php di root
-        exit();
-    } else {
-        echo "Error: " . $sql . "<br>" . $db->get_error();
-    }
-
-    $db->close_con();
-}
+    include '../config.php';
+    $db = new Database();
 ?>
 
 <!DOCTYPE html>
@@ -30,20 +12,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 <body>
     <div class="header">
-        <h1>RESTOCK PRODUK</h1>
+        <h1>Tambah Produk</h1>
     </div>
     <div class="bg"></div>
     <div class="boxB">
         <h2><img src="../img/restock.png" alt="" class="restok">Masukkan Barang</h2>
-        <form method="post" action="">
+        <form method="post" action="../function/product.php">
             <div class="addB">
                 <input type="text" name="nama_produk" placeholder="Nama Produk" required><br>
-                <input type="number" name="harga" placeholder="Harga" required><br>
-                <input type="number" name="stok" placeholder="Jumlah" required><br><br>
+                <select name="id_kategori">
+                    <?php
+                        $sql_kt = "SELECT id, nama_kategori FROM kategori";
+                        $data_kt = $db->fetchdata($sql_kt);
+                        foreach ($data_kt as $dat_kt) {
+                            echo "<option value='" . $dat_kt['id'] . "'>" . $dat_kt['nama_kategori'] . "</option>";
+                        }
+                    ?>
+                </select><br>
+                <input type="number" name="harga" placeholder="Harga" required><br><br>
+                <!-- <input type="number" name="stok" placeholder="Jumlah Stok" required><br>
+                <input type="date" name="tgl_restok" required><br><br> -->
             </div>
             <div class="bt">
                 <button class="btn" type="submit"><a href="view.php">Kembali</a></button>
-                <button class="btn" type="submit" value="Simpan">Simpan</button>
+                <button class="btn" type="submit" name="SimpanProduk" value="Simpan">Simpan</button>
             </div>
         </form>
     </div>

@@ -1,36 +1,23 @@
 <?php
-include '../config.php';
-
-$db = new Database();
-
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
-    $produk = $db->datasql("SELECT * FROM produk WHERE id = $id");
-
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $nama_produk = $_POST['nama_produk'];
-        $harga = $_POST['harga'];
-        $stok = $_POST['stok'];
-
-        $sql = "UPDATE produk SET nama_produk='$nama_produk', harga='$harga', stok='$stok' WHERE id_produk=$id";
-
-        if ($db->sqlquery($sql) === TRUE) {
-            header("Location: view.php");
+    include '../config.php';
+    $db = new database();
+    
+    if (isset($_GET['id'])) {
+        $id = $_GET['id'];
+        $produk = $db->datasql("SELECT * FROM produk WHERE id = $id");
+    
+        if (!$produk) {
+            echo "Error: Produk tidak ditemukan.";
             exit();
-        } else {
-            echo "Error: " . $sql . "<br>" . $db->get_error();
         }
-
-        $db->close_con();
+    } else {
+        echo "Error: ID produk tidak ditemukan.";
+        exit();
     }
-} else {
-    echo "Error: ID produk tidak ditemukan.";
-    exit();
-}
 ?>
-
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Edit Produk</title>
     <link rel="icon" href="../img/logo.png">
@@ -43,15 +30,31 @@ if (isset($_GET['id'])) {
     <div class="bg"></div>
     <div class="boxB">
         <h2><img src="../img/replacement.png" alt="" class="restok">Mengganti Barang</h2>
-        <form method="post" action="">
+        <form method="post" action="/function/product.php">
             <div class="addB">
-                <input type="text" name="nama_produk" value="<?= $produk['nama_produk'] ?>" placeholder="Nama Produk" required><br>
-                <input type="number" name="harga" value="<?= $produk['harga'] ?>" placeholder="Harga" required><br>
-                <input type="number" name="stok" value="<?= $produk['stok'] ?>" placeholder="Jumlah" required><br><br>
+                <select name="nama_produk">
+                    <?php
+                        $sql_pr = "SELECT id, nama_produk FROM produk"; // Include 'harga' column
+                        $data_pr = $db->fetchdata($sql_pr);
+                        foreach ($data_pr as $dat_pr) {
+                            echo "<option value='" . $dat_pr['id'] . "'>" . $dat_pr['nama_produk'] . "</option>";
+                        }
+                    ?>
+                </select><br>
+                <select name="id_kategori">
+                    <?php
+                        $sql_kt = "SELECT id, nama_kategori FROM kategori";
+                        $data_kt = $db->fetchdata($sql_kt);
+                        foreach ($data_kt as $dat_kt) {
+                            echo "<option value='" . $dat_kt['id'] . "'>" . $dat_kt['nama_kategori'] . "</option>";
+                        }
+                    ?>
+                </select><br>
+                <input type="number" name="harga" value="<?= $produk['harga'] ?>" placeholder="harga" required><br><br>
             </div>
             <div class="bt">
                 <button class="btn" type="submit"><a href="view.php">Kembali</a></button>
-                <button class="btn" type="submit" value="Simpan">Simpan</button>
+                <button class="btn" type="submit" name="UpdateProduk" value="Simpan">Simpan</button>
             </div>
         </form>
     </div>

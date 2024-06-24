@@ -1,0 +1,27 @@
+pada view.php sebelumnya hanya ada add product berfungsi sebagai menabhakn produk saja, jadi tambahkan function pada database untuk menambahkan stok pada barang yang sudah ada. hasilnya ada 3 tombol pada view.php yaitu daftar pelanggan, add product, stok produk. [DONE]
+
+Perbaiki tabel gudan yang berfungsi sebagai add stok, kemudian tabel
+produk berfungsi sebagai add produk [DONE]
+
+buat function totalharga untuk menampilkan total dari harga * jumlah [DONE]
+
+ubahlah sistem search menjadi live search "menggunakan ajax"
+
+lalu pada bagian delete dan update buatkan prosedure [DONE]
+
+
+Produk
+id
+nama_produk
+id_kategori
+
+Gudang
+id
+id_produk
+id_satuan
+stok
+harga
+tgl_restok
+
+
+Pada view.php bagian edit hanya produk, id kategori, harga. sedangkan untuk stok bisa dimenu Stok produk

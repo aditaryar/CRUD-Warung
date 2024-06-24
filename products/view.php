@@ -2,15 +2,11 @@
 include '../config.php';
 
 $db = new Database();
-$produk = $db->fetchdata("SELECT * FROM produk WHERE id");
-
-$query_run = $produk;
-
-if (isset($_GET['cari'])) {
-    $filtervalues = $_GET['cari'];
-    $query = "SELECT * FROM produk WHERE nama_produk LIKE '%$filtervalues%'";
-    $query_run = $db->fetchdata($query);
-}
+$sql = "SELECT pr.id AS ID, pr.nama_produk AS NamaProduk, pr.harga AS Harga, g.stok AS Stok
+        FROM gudang g
+        JOIN produk pr ON g.id_produk = pr.id
+        ORDER BY g.id;";
+$produk = $db->fetchdata($sql);
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +25,7 @@ if (isset($_GET['cari'])) {
             <div class="select">
                 <a href="../index.php"><button>Daftar Pelanggan</button></a>
                 <a href="add.php"><button>Tambah Produk</button></a>
+                <a href="stok/add.php"><button>Stok Produk</button></a>
             </div>
             <form method="GET" action="">
                 <input class="cariV" type="text" name="cari" value="<?php if(isset($_GET['cari'])){echo $_GET['cari']; }?>" placeholder="Cari">
@@ -48,17 +45,17 @@ if (isset($_GET['cari'])) {
                 </thead>
                 <tbody>
                     <?php
-                    if (!empty($query_run)) {
+                    if (!empty($produk)) {
                         $i = 1;
-                        foreach ($query_run as $row) {
+                        foreach ($produk as $row) {
                             echo "<tr>
                                     <td>$i</td>
-                                    <td>".$row["nama_produk"]."</td>
-                                    <td>".$row["harga"]."</td>
-                                    <td>".$row["stok"]."</td>
+                                    <td>".$row["NamaProduk"]."</td>
+                                    <td>".$row["Harga"]."</td>
+                                    <td>".$row["Stok"]."</td>
                                     <td>
-                                        <a href='update.php?id=".$row["id"]."'><button>Edit</button></a>
-                                        <a href='delete.php?id=".$row["id"]."'><button>Delete</button></a>
+                                        <a href='update.php?id=".$row["ID"]."'><button>Edit</button></a>
+                                        <a href='delete.php?id=".$row["ID"]."'><button>Delete</button></a>
                                     </td>                                
                                  </tr>";
                             $i++;

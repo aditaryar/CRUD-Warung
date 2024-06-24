@@ -3,66 +3,78 @@ include 'config.php';
 
 $db = new Database();
 
-// Menentukan jumlah data per halaman
-$limit = 5;
-
-// Menentukan halaman saat ini
-$page = isset($_GET['page']) ? $_GET['page'] : 1;
-$start = ($page - 1) * $limit;
-
-// Query default untuk menampilkan semua data dengan paginasi
-$sql = "SELECT 
-        p.id AS ID,
-        p.nama AS Nama_Pelanggan,
-        pr.nama_produk AS Produk,
-        pr.harga AS Harga,
-        p.jumlah AS Jumlah,
-        (pr.harga * p.jumlah) AS Total_Harga,
-        p.tgl_pembelian AS Tanggal_Pembelian
-    FROM 
-        pelanggan p
-    JOIN 
-        produk pr ON p.id_produk = pr.id
-    ORDER BY 
-        p.id
-    LIMIT $start, $limit";
+$sql = "SELECT
+  p.id AS ID,
+  p.nama AS Nama_Pelanggan,
+  pr.nama_produk AS Produk,
+  g.harga AS Harga,
+  p.jumlah AS Jumlah,
+  TotalHarga() AS Total,
+  p.tanggal_pembelian AS Tanggal_Pembelian
+FROM pelanggan AS p
+INNER JOIN produk AS pr ON p.id_produk = pr.id
+INNER JOIN gudang AS g ON pr.id = g.id_produk;";
 $query_run = $db->fetchdata($sql);
 
-// Mengambil total jumlah data
-$totalResult = $db->sqlquery("SELECT COUNT(*) AS id FROM pelanggan")->fetch_assoc();
-$total = $totalResult['id'];
+// $sql = "SELECT TotalHarga() AS Total";
+// $result = $db->sqlquery($sql);
 
-// Menentukan total halaman
-$totalPages = ceil($total / $limit);
+// // Menentukan jumlah data per halaman
+// $limit = 5;
 
-if (isset($_GET['cari'])) {
-    $filtervalues = $_GET['cari'];
-    $query = "SELECT 
-                p.id AS ID,
-                p.nama AS Nama_Pelanggan,
-                pr.nama_produk AS Produk,
-                pr.harga AS Harga,
-                p.jumlah AS Jumlah,
-                (pr.harga * p.jumlah) AS Total_Harga,
-                p.tgl_pembelian AS Tanggal_Pembelian
-              FROM 
-                pelanggan p
-              JOIN 
-                produk pr ON p.id_produk = pr.id
-              WHERE 
-                CONCAT(p.nama, pr.nama_produk) LIKE '%$filtervalues%'
-              ORDER BY 
-                p.id
-              LIMIT $start, $limit";
-    $query_run = $db->fetchdata($query);
+// // Menentukan halaman saat ini
+// $page = isset($_GET['page']) ? $_GET['page'] : 1;
+// $start = ($page - 1) * $limit;
 
-    // Mengambil total jumlah data yang cocok dengan kriteria pencarian
-    $totalResult = $db->sqlquery("SELECT COUNT(*) AS id FROM pelanggan p JOIN produk pr ON p.id_produk = pr.id WHERE CONCAT(p.nama, pr.nama_produk) LIKE '%$filtervalues%'")->fetch_assoc();
-    $total = $totalResult['id'];
+// // Query default untuk menampilkan semua data dengan paginasi
+// $sql = "SELECT
+//           p.id AS ID,
+//           p.nama AS Nama_Pelanggan,
+//           pr.nama_produk AS Produk,
+//           g.harga AS Harga,
+//           p.jumlah AS Jumlah,
+//           (g.harga * p.jumlah) AS Total_Harga,
+//         FROM pelanggan p
+//         JOIN produk pr ON p.id_produk = pr.id
+//         JOIN gudang g ON pr.kodeGudang = g.id
+//         ORDER BY p.id
+//         LIMIT $start, $limit;";
+// $query_run = $db->fetchdata($sql);
 
-    // Menentukan total halaman yang cocok dengan kriteria pencarian
-    $totalPages = ceil($total / $limit);
-}
+// // Mengambil total jumlah data
+// $totalResult = $db->sqlquery("SELECT COUNT(*) AS id FROM pelanggan")->fetch_assoc();
+// $total = $totalResult['id'];
+
+// // Menentukan total halaman
+// $totalPages = ceil($total / $limit);
+
+// if (isset($_GET['cari'])) {
+//     $filtervalues = $_GET['cari'];
+//     $query = "SELECT 
+//                 p.id AS ID,
+//                 p.nama AS Nama_Pelanggan,
+//                 g.nama_produk AS Produk,
+//                 g.harga AS Harga,
+//                 p.jumlah AS Jumlah,
+//                 (g.harga * p.jumlah) AS Total_Harga, /* Pada bagian ini ubahlah menjadi function (function totalharga) */
+//                 p.tgl_pembelian AS Tanggal_Pembelian
+//               FROM pelanggan p
+//               JOIN produk pr ON p.id_produk = pr.id
+//               JOIN gudang g ON pr.id = g.id
+//               WHERE 
+//                 CONCAT(p.nama, g.nama_produk) LIKE '%$filtervalues%'
+//               ORDER BY 
+//                 p.id
+//               LIMIT $start, $limit";
+//     $query_run = $db->fetchdata($query);
+
+//     // Mengambil total jumlah data yang cocok dengan kriteria pencarian
+//     $totalResult = $db->sqlquery("SELECT COUNT(*) AS id FROM pelanggan p JOIN produk pr ON p.id_produk = pr.id WHERE CONCAT(p.nama, pr.nama_produk) LIKE '%$filtervalues%'")->fetch_assoc();
+//     $total = $totalResult['id'];
+
+//     // Menentukan total halaman yang cocok dengan kriteria pencarian
+//     $totalPages = ceil($total / $limit);
+// }
 ?>
 
 <!DOCTYPE html>
@@ -106,22 +118,22 @@ if (isset($_GET['cari'])) {
         <tbody>
           <?php
           if (!empty($query_run)) {
-            // $i = 1;
+            $i = 1;
             foreach ($query_run as $row) {
               echo "<tr>
-                <td>".$row["ID"]."</td>
+                <td>".$i."</td>
                 <td>".$row["Nama_Pelanggan"]."</td>
                 <td>".$row["Produk"]."</td> 
                 <td>".$row["Harga"]."</td> 
                 <td>".$row["Jumlah"]."</td> 
-                <td>".$row["Total_Harga"]."</td> 
+                <td>".$row["Total"]."</td> 
                 <td>".$row["Tanggal_Pembelian"]."</td> 
                 <td>
                   <a href='./orders/update.php?id=".$row["ID"]."'><button>Edit</button></a>
                   <a href='./orders/delete.php?id=".$row["ID"]."'><button>Delete</button></a>
                 </td>
               </tr>";
-              // $i++;
+              $i++;
             }
           } else {
             echo (isset($_GET['cari'])) ? "
@@ -132,12 +144,12 @@ if (isset($_GET['cari'])) {
       </table>
     </div>
   </div>
-  <div class="pagination">
+  <!-- <div class="pagination">
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
             <a href="index.php?page=<?php echo $i; ?>" class="<?php if ($page == $i) echo 'active'; ?>">
                 <?php echo $i; ?>
             </a>
         <?php endfor; ?>
-  </div>
+  </div> -->
 </body>
 </html>

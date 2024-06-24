@@ -4,28 +4,28 @@ class Database {
     public $host = "localhost";
     public $user = "root";
     public $password = "";
-    public $db = "warung";
+    public $db = "warung2";
 
-    function __construct() {
+    public function __construct() {
         $this->start_con();
     }
 
-    function start_con() {
+    private function start_con() {
         $this->con = new mysqli($this->host, $this->user, $this->password, $this->db);
         if ($this->con->connect_error) {
             die('Can not connect mysql server local: ' . $this->con->connect_error);
         }
     }
 
-    function close_con() {
+    public function close_con() {
         return $this->con->close();
     }
 
-    function sqlquery($sql) {
+    public function sqlquery($sql) {
         return $this->con->query($sql);
     }
 
-    function jumrec($sql) {
+    public function jumrec($sql) {
         if ($hasil = $this->sqlquery($sql))
             $jum = $hasil->num_rows;
         else    
@@ -33,14 +33,14 @@ class Database {
         return $jum;
     }
 
-    function datasql($sql) {
+    public function datasql($sql) {
         $data = array();
         if ($hasil = $this->sqlquery($sql))
             $data = $hasil->fetch_array(MYSQLI_BOTH);
         return $data;
     }
 
-    function fetchdata($sql) {
+    public function fetchdata($sql) {
         $res = array();
         if ($hasil = $this->sqlquery($sql))
             while ($data = $hasil->fetch_array(MYSQLI_BOTH)) {
@@ -49,29 +49,36 @@ class Database {
         return $res;
     }
 
-    function get_error() {
+    public function get_error() {
         return $this->con->error;
     }
 
     public function beginTransaction() {
-        mysqli_autocommit($this->con, FALSE);
-      }
+        $this->con->autocommit(FALSE);
+    }
     
-      public function rollbackTransaction() {
-        mysqli_rollback($this->con);
-      }
+    public function rollbackTransaction() {
+        $this->con->rollback();
+    }
     
-      public function insert_id() {
-        return mysqli_insert_id($this->con);
+    public function insert_id() {
+        return $this->con->insert_id;
+    }
     
-      }
-    
-      public function commitTransaction() {
-        mysqli_commit($this->con);
-      }
+    public function commitTransaction() {
+        $this->con->commit();
+    }
 
-      public function begin_transaction() {
+    public function begin_transaction() {
         $this->con->begin_transaction();
+    }
+
+    public function prepare($query) {
+        return $this->con->prepare($query);
+    }
+
+    public function escape_string($string) {
+        return $this->con->real_escape_string($string);
     }
 }
 ?>

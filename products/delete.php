@@ -5,7 +5,7 @@ $db = new Database();
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $query = "DELETE FROM produk WHERE id = $id";
+    $query = "DELETE FROM gudang WHERE id = $id";
     if ($db->sqlquery($query)) {
         header("Location: view.php");
     } else {
